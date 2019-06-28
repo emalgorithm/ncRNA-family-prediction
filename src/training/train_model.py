@@ -55,8 +55,6 @@ parser.add_argument('--train_dataset', type=str,
                                                                           'dataset')
 parser.add_argument('--val_dataset', type=str,
                     default='../data/val.fasta', help='Path to val dataset')
-parser.add_argument('--test_dataset', type=str,
-                    default='../data/test_13_classes.fasta', help='Path to test dataset')
 
 
 opt = parser.parse_args()
@@ -76,7 +74,6 @@ optimizer = optim.Adam(model.parameters(), lr=opt.learning_rate)
 # Data Loading
 n_train_samples = None if not opt.n_samples else int(opt.n_samples * 0.8)
 n_val_samples = None if not opt.n_samples else int(opt.n_samples * 0.1)
-n_test_samples = None if not opt.n_samples else int(opt.n_samples * 0.1)
 
 train_set = RNAFamilyGraphDataset(opt.train_dataset, opt.foldings_dataset,
                                   seq_max_len=opt.seq_max_len,
@@ -85,15 +82,9 @@ train_set = RNAFamilyGraphDataset(opt.train_dataset, opt.foldings_dataset,
 val_set = RNAFamilyGraphDataset(opt.val_dataset, opt.foldings_dataset, seq_max_len=opt.seq_max_len,
                                 seq_min_len=opt.seq_min_len,
                                 n_samples=n_val_samples)
-test_set = RNAFamilyGraphDataset(opt.test_dataset, opt.foldings_dataset,
-                                 seq_max_len=opt.seq_max_len,
-                                 seq_min_len=opt.seq_min_len,
-                                 n_samples=n_test_samples)
 
 train_loader = DataLoader(train_set, batch_size=opt.batch_size, shuffle=True)
 val_loader = DataLoader(val_set, batch_size=opt.batch_size, shuffle=False)
-test_loader = DataLoader(test_set, batch_size=opt.batch_size, shuffle=False)
-
 
 def train_epoch(model, train_loader):
     model.train()
@@ -138,8 +129,6 @@ def run(model, n_epochs, train_loader, results_dir, model_dir):
     train_accuracies = []
     val_losses = []
     val_accuracies = []
-    test_losses = []
-    test_accuracies = []
 
     for epoch in range(n_epochs):
         start = time.time()
@@ -149,10 +138,6 @@ def run(model, n_epochs, train_loader, results_dir, model_dir):
         val_loss, val_accuracy = evaluate_family_classifier(model, val_loader,
                                                                           loss_function, mode='val',
                                                                     device=opt.device, verbose=opt.verbose)
-        test_loss, test_accuracy = evaluate_family_classifier(model, test_loader,
-                                                              loss_function, mode='test',
-                                                              device=opt.device,
-                                                              verbose=opt.verbose)
         end = time.time()
         print("Epoch took {0:.2f} seconds".format(end - start))
 
@@ -162,22 +147,18 @@ def run(model, n_epochs, train_loader, results_dir, model_dir):
         #
         train_losses.append(loss)
         val_losses.append(val_loss)
-        test_losses.append(test_loss)
         train_accuracies.append(accuracy)
         val_accuracies.append(val_accuracy)
-        test_accuracies.append(test_accuracy)
 
-        plot_loss(train_losses, val_losses, test_losses ,file_name=results_dir + 'loss.jpg')
-        plot_loss(train_accuracies, val_accuracies, test_accuracies ,file_name=results_dir + 'acc.jpg',
+        plot_loss(train_losses, val_losses,file_name=results_dir + 'loss.jpg')
+        plot_loss(train_accuracies, val_accuracies, file_name=results_dir + 'acc.jpg',
                   y_label='accuracy')
 
         pickle.dump({
             'train_losses': train_losses,
             'val_losses': val_losses,
-            'test_losses': test_losses,
             'train_accuracies': train_accuracies,
             'val_accuracies': val_accuracies,
-            'test_accuracies': test_accuracies,
         }, open(results_dir + 'scores.pkl', 'wb'))
 
         if len(val_accuracies) > opt.early_stopping and max(val_accuracies[-opt.early_stopping:])\
@@ -185,14 +166,10 @@ def run(model, n_epochs, train_loader, results_dir, model_dir):
             print("Training terminated because of early stopping")
             print("Best val_loss: {}".format(min(val_losses)))
             print("Best val_accuracy: {}".format(max(val_accuracies)))
-            print("Corresponding test_loss: {}".format(test_losses[np.argmin(val_losses)]))
-            print("Corresponding test_accuracy: {}".format(test_accuracies[np.argmax(
-                val_accuracies)]))
 
             with open(results_dir + 'scores.txt', 'w') as f:
-                f.write("Best val_accuracy: {} \n Corresponding test_accuracy: {}".format(max(
-                    val_accuracies), test_accuracies[np.argmax(
-                val_accuracies)]))
+                f.write("Best val_accuracy: {}".format(max(
+                    val_accuracies)))
             break
 
 
