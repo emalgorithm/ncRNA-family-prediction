@@ -63,7 +63,7 @@ python training/train_model.py --help
 ```
 
 ### Evaluation
-The model can be evaluated with the command (from inside src/):
+After training, the model can be evaluated with the command (from inside src/):
 
 ```
 python evaluation/evaluate_model.py
