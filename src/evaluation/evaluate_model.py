@@ -11,16 +11,15 @@ from src.data_util.data_constants import families, word_to_ix
 from src.data_util.rna_family_graph_dataset import RNAFamilyGraphDataset
 from torch_geometric.data import DataLoader
 from src.model.gcn import GCN
-from src.evaluation import get_sensitivity, get_specificity
+from src.evaluation.evaluation_util import get_sensitivity, get_specificity
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model_name', default="best", help='model name')
+parser.add_argument('--model_name', default="test", help='model name')
 parser.add_argument('--test_dataset',
-                    default='../data/family_prediction/dataset_Rfam_validated_2600_13classes'
-                            '.fasta', help='Path to test dataset')
+                    default='../data/test_13_classes.fasta', help='Path to test dataset')
 args = parser.parse_args()
 
-foldings_dataset = '../data/family_prediction/foldings.pkl'
+foldings_dataset = '../data/foldings.pkl'
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 n_classes = len(families)
