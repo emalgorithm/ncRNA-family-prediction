@@ -1,5 +1,8 @@
 import os
 import sys
+
+from src.data_util.rna_family_graph_dataset1 import RNAFamilyGraphDataset1
+
 sys.path.append(os.getcwd().split('src')[0])
 
 import torch
@@ -49,12 +52,11 @@ parser.add_argument('--early_stopping', type=int, default=30, help='Number of ep
                                                                    'stopping')
 parser.add_argument('--verbose', type=bool, default=False, help='Verbosity')
 parser.add_argument('--foldings_dataset', type=str,
-                    default='../data/foldings.pkl', help='Path to foldings')
+                    default='../../data/foldings.pkl', help='Path to foldings')
 parser.add_argument('--train_dataset', type=str,
-                    default='../data/train.fasta', help='Path to training '
-                                                                          'dataset')
+                    default='../../data', help='Path to training dataset')
 parser.add_argument('--val_dataset', type=str,
-                    default='../data/val.fasta', help='Path to val dataset')
+                    default='../../data', help='Path to val dataset')
 
 
 opt = parser.parse_args()
@@ -79,7 +81,7 @@ train_set = RNAFamilyGraphDataset(opt.train_dataset, opt.foldings_dataset,
                                   seq_max_len=opt.seq_max_len,
                                     seq_min_len=opt.seq_min_len,
                                     n_samples=n_train_samples)
-val_set = RNAFamilyGraphDataset(opt.val_dataset, opt.foldings_dataset, seq_max_len=opt.seq_max_len,
+val_set = RNAFamilyGraphDataset1(opt.val_dataset, opt.foldings_dataset, seq_max_len=opt.seq_max_len,
                                 seq_min_len=opt.seq_min_len,
                                 n_samples=n_val_samples)
 
