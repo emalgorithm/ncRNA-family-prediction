@@ -15,7 +15,7 @@ class RNAFamilyGraphDataset(InMemoryDataset):
                  seq_min_len=1, n_samples=None):
         super(RNAFamilyGraphDataset, self).__init__(file_path, transform, pre_transform)
 
-        with open(file_path, "r") as handle:
+        with open(file_path+'/train.fasta', "r") as handle:
             records = list(SeqIO.parse(handle, "fasta"))
 
         foldings = pickle.load(open(foldings_path, "rb"))
